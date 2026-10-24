@@ -8,6 +8,7 @@ dist
 .cloudflare/
 
 .yarn/*
+!.yarn/patches
 !.yarn/releases
 !.yarn/plugins
 .pnp.*

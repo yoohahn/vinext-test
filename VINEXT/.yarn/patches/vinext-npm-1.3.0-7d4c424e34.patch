@@ -1,0 +1,28 @@
+diff --git a/dist/server/app-rsc-handler.js b/dist/server/app-rsc-handler.js
+index 127f1f4..3629854 100644
+--- a/dist/server/app-rsc-handler.js
++++ b/dist/server/app-rsc-handler.js
+@@ -484,7 +484,7 @@ async function handleAppRscRequest(options, request, preMiddlewareRequestContext
+ 		const cache = responseStageProbeMode || isOnDemandRevalidate || (props.kind === "app-page" || props.kind === "app-route-handler") && (props.bypassInterceptionContextCache || props.forceDynamic === true && responseStagePolicy === null) ? "bypass" : canUseSharedWorkerResponseStage ? "shared" : "bypass";
+ 		let dispatchRequest = props.kind === "app-page" ? prepareSharedAppPageDispatch(stageRequest, cache) : stageRequest;
+ 		let canonicalRsc = null;
+-		if (cache === "shared" && props.kind === "app-page" && props.isRscRequest && props.matchKind === "request" && props.interceptionContext === null && props.interceptionId === null && props.mountedSlotsHeader === null) {
++		if (cache === "shared" && props.kind === "app-page" && props.isRscRequest && (props.matchKind === "request" || props.matchKind === "resolved") && props.interceptionContext === null && props.interceptionId === null && props.mountedSlotsHeader === null) {
+ 			const headers = new Headers(dispatchRequest.headers);
+ 			if (props.renderMode === "navigation" ? canonicalizePrewarmableRscRequestHeaders(headers) : props.renderMode === "prefetch-loading-shell" && props.canUseCanonicalLoadingShell ? canonicalizeLoadingShellRscRequestHeaders(headers) : false) {
+ 				canonicalRsc = {
+diff --git a/dist/shims/navigation.js b/dist/shims/navigation.js
+index cf39e208b65606e81dfbb644b37a94c0667eb424..ce4da3bb9c1b2c10f1c45a122ce2657c0a2a0766 100644
+--- a/dist/shims/navigation.js
++++ b/dist/shims/navigation.js
+@@ -1040,9 +1040,8 @@ let _cachedEmptyClientSearchParams = null;
+ * be visible until the next commit.
+ */
+ function getSearchParamsSnapshot() {
+-	if (getNavigationContext()) return getServerSearchParamsSnapshot();
+ 	const pagesCtx = getPagesNavigationContext();
+-	if (pagesCtx) return getReadonlyPagesSearchParams(pagesCtx.searchParams);
++	if (!getNavigationContext() && pagesCtx) return getReadonlyPagesSearchParams(pagesCtx.searchParams);
+ 	const cached = getClientNavigationState()?.cachedReadonlySearchParams;
+ 	if (cached) return cached;
+ 	if (_cachedEmptyClientSearchParams === null) _cachedEmptyClientSearchParams = new ReadonlyURLSearchParams();
